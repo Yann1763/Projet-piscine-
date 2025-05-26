@@ -1,0 +1,67 @@
+<?php
+session_start();
+require 'db.php';
+
+if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'admin') {
+    header("Location: compte.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ajouter un article - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="accueil.php">Agora Francia</a>
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" href="accueil.php">Accueil</a></li>
+      <li class="nav-item"><a class="nav-link" href="gestion_articles.php">Gérer les articles</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#">Ajouter un article</a></li>
+      <li class="nav-item"><a class="nav-link" href="logout.php">Se déconnecter</a></li>
+    </ul>
+    <span class="navbar-text text-white">Bonjour <strong><?= htmlspecialchars($_SESSION['user']['prenom']) ?></strong></span>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2>Ajouter un article (Admin)</h2>
+  <form method="post">
+    <input type="text" name="titre" class="form-control mb-2" placeholder="Titre" required>
+    <textarea name="description" class="form-control mb-2" placeholder="Description" required></textarea>
+    <input type="number" step="0.01" name="prix" class="form-control mb-2" placeholder="Prix (€)" required>
+
+    <select name="type_vente" class="form-control mb-2" required>
+      <option value="achat_immediat">Achat immédiat</option>
+      <option value="enchere">Enchère</option>
+    </select>
+
+    <input type="datetime-local" name="date_limite" class="form-control mb-2" placeholder="Date limite (enchère)">
+    <input type="text" name="image" class="form-control mb-2" placeholder="Image URL">
+    <button type="submit" class="btn btn-primary">Ajouter l'article</button>
+  </form>
+
+  <?php
+  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $stmt = $pdo->prepare("INSERT INTO articles (titre, description, prix, type_vente, image, date_limite, vendeur_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+      $_POST['titre'],
+      $_POST['description'],
+      $_POST['prix'],
+      $_POST['type_vente'],
+      $_POST['image'],
+      $_POST['date_limite'] ?: null,
+      $_SESSION['user']['id']
+    ]);
+    echo '<div class="alert alert-success mt-3">Article ajouté avec succès !</div>';
+  }
+  ?>
+</div>
+</body>
+</html>

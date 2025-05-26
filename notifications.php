@@ -1,0 +1,51 @@
+<?php
+session_start();
+require 'db.php';
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Notifications - Agora Francia</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="accueil.php">Agora Francia</a>
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" href="accueil.php">Accueil</a></li>
+      <li class="nav-item"><a class="nav-link" href="parcourir.php">Tout Parcourir</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#">Notifications</a></li>
+      <li class="nav-item"><a class="nav-link" href="panier.php">Panier</a></li>
+      <li class="nav-item"><a class="nav-link" href="compte.php">Votre Compte</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2>Vos notifications</h2>
+
+  <?php
+  if (isset($_SESSION['user'])) {
+    $userId = $_SESSION['user']['id'];
+    $stmt = $pdo->prepare("SELECT message, date_envoi FROM notifications WHERE utilisateur_id = ? ORDER BY date_envoi DESC");
+    $stmt->execute([$userId]);
+
+    if ($stmt->rowCount() > 0) {
+      foreach ($stmt as $notif) {
+        echo '<div class="alert alert-info">'.htmlspecialchars($notif['message']).'<br><small>' . $notif['date_envoi'] . '</small></div>';
+      }
+    } else {
+      echo '<div class="alert alert-secondary">Aucune notification pour l’instant.</div>';
+    }
+  } else {
+    echo '<div class="alert alert-warning">Veuillez vous connecter pour voir vos notifications.</div>';
+  }
+  ?>
+</div>
+
+</body>
+</html>

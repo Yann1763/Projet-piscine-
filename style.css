@@ -1,0 +1,142 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Corps général */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+/* Navigation */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.6rem;
+}
+
+.nav-link {
+  margin-right: 15px;
+  transition: color 0.3s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #ffc107 !important;
+}
+
+/* Titres */
+h1, h2, h4, h5 {
+  font-weight: 600;
+}
+
+h4 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+/* Texte */
+p {
+  font-size: 1rem;
+}
+
+/* Cartes d'article */
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  height: 250px;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  font-size: 0.95rem;
+}
+
+/* Boutons */
+.btn {
+  font-weight: bold;
+}
+
+.btn-success {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-outline-warning {
+  color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-outline-warning:hover {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+/* Footer */
+footer {
+  background-color: #212529;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+footer p {
+  margin: 0;
+}
+
+/* Espacements */
+.container {
+  padding-bottom: 50px;
+}
+
+/* Notifications */
+.alert {
+  font-size: 1rem;
+}
+
+/* Panier */
+.list-group-item {
+  padding: 15px;
+  font-size: 1rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* Compte */
+form .form-label {
+  font-weight: 500;
+}
+
+/* Timer enchères (placeholder style, JS à venir) */
+.timer {
+  font-weight: bold;
+  color: #dc3545;
+  font-size: 1.1rem;
+}
