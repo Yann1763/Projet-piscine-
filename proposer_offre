@@ -1,0 +1,74 @@
+<?php
+session_start();
+require 'db.php';
+
+if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'acheteur') {
+    header("Location: compte.php");
+    exit;
+}
+
+$article_id = $_GET['id'] ?? null;
+if (!$article_id) {
+    die("Article non spécifié.");
+}
+
+// Vérifie que l'article existe et récupère son vendeur
+$req = $pdo->prepare("SELECT vendeur_id FROM articles WHERE id = ?");
+$req->execute([$article_id]);
+$article = $req->fetch();
+
+if (!$article) {
+    die("Article introuvable.");
+}
+$vendeur_id = $article['vendeur_id'];
+
+// Empêcher d'envoyer une nouvelle offre si une est déjà en attente
+$check = $pdo->prepare("SELECT COUNT(*) FROM offres WHERE acheteur_id = ? AND article_id = ? AND statut = 'en_attente'");
+$check->execute([$_SESSION['user']['id'], $article_id]);
+$existe = $check->fetchColumn();
+
+if ($existe > 0) {
+    die("Vous avez déjà une offre en attente pour cet article. Veuillez attendre la réponse du vendeur.");
+}
+
+// Traitement de l'offre
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $prix = floatval($_POST['prix']);
+
+    if ($prix <= 0) {
+        die("Le prix proposé doit être supérieur à 0.");
+    }
+
+    // Enregistrement de l'offre
+    $stmt = $pdo->prepare("INSERT INTO offres (acheteur_id, article_id, prix_propose, statut, date_proposition)
+                           VALUES (?, ?, ?, 'en_attente', NOW())");
+    $stmt->execute([$_SESSION['user']['id'], $article_id, $prix]);
+
+    // Notification pour le vendeur
+    $notif = $pdo->prepare("INSERT INTO notifications (utilisateur_id, message) VALUES (?, ?)");
+    $notif->execute([$vendeur_id, "Nouvelle offre à {$prix} € sur l’un de vos articles."]);
+
+    $_SESSION['notif'] = "Offre envoyée avec succès à {$prix} € !";
+    header("Location: parcourir.php");
+    exit;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Proposer une offre</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+
+  <h2>Proposer une offre</h2>
+  <form method="post">
+    <label for="prix">Prix proposé (€)</label>
+    <input type="number" step="0.01" name="prix" class="form-control mb-3" required>
+    <button type="submit" class="btn btn-warning">Envoyer l'offre</button>
+  </form>
+
+</body>
+</html>
