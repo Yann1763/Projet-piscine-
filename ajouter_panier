@@ -1,0 +1,22 @@
+<?php
+session_start();
+require 'db.php';
+
+if (!isset($_SESSION['user'])) {
+  header('Location: compte.php');
+  exit;
+}
+
+$article_id = $_GET['id'] ?? null;
+if (!$article_id) {
+  die("Article invalide");
+}
+
+$pdo->prepare("INSERT INTO panier (utilisateur_id, article_id) VALUES (?, ?)")
+    ->execute([$_SESSION['user']['id'], $article_id]);
+
+$_SESSION['notif'] = "Article ajouté au panier.";
+header("Location: parcourir.php");
+exit;
+?>
+
