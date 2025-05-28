@@ -1,0 +1,63 @@
+<?php
+require 'db.php';
+
+$date_now = date('Y-m-d H:i:s');
+
+// ✅ 1. Sélectionner les articles dont la date limite est dépassée
+$stmt = $pdo->prepare("
+    SELECT id FROM articles 
+    WHERE type_vente = 'enchere' 
+      AND date_limite IS NOT NULL 
+      AND date_limite < ? 
+      AND etat = 'disponible'
+");
+$stmt->execute([$date_now]);
+$articles_expired = $stmt->fetchAll();
+
+foreach ($articles_expired as $article) {
+    $article_id = $article['id'];
+
+    // ✅ 2. Trouver l’enchère la plus haute
+    $stmt = $pdo->prepare("
+        SELECT acheteur_id, montant 
+        FROM encheres 
+        WHERE article_id = ? 
+        ORDER BY montant DESC 
+        LIMIT 1
+    ");
+    $stmt->execute([$article_id]);
+    $enchere = $stmt->fetch();
+
+    if ($enchere) {
+        $acheteur_id = $enchere['acheteur_id'];
+        $montant = $enchere['montant'];
+
+        // ✅ 3. Ajouter au panier si pas déjà présent
+        $check = $pdo->prepare("
+            SELECT COUNT(*) FROM panier 
+            WHERE utilisateur_id = ? AND article_id = ?
+        ");
+        $check->execute([$acheteur_id, $article_id]);
+
+        if ($check->fetchColumn() == 0) {
+            $insert = $pdo->prepare("
+                INSERT INTO panier (utilisateur_id, article_id, prix_final) 
+                VALUES (?, ?, ?)
+            ");
+            $insert->execute([$acheteur_id, $article_id, $montant]);
+
+            // ✅ 4. Notification gagnant
+            $notif = $pdo->prepare("
+                INSERT INTO notifications (utilisateur_id, message) 
+                VALUES (?, ?)
+            ");
+            $notif->execute([$acheteur_id, "🎉 Vous avez remporté l'enchère pour un article au prix de $montant € !"]);
+        }
+    }
+
+    // ✅ 5. Marquer l’article comme VENDU avec le bon champ "etat"
+    $update = $pdo->prepare("UPDATE articles SET etat = 'vendu' WHERE id = ?");
+    $update->execute([$article_id]);
+}
+
+echo "Traitement terminé à " . $date_now;
