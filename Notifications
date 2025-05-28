@@ -386,3 +386,100 @@
 </body>
 </html>
 
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agora Francia</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR DYNAMIQUE -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="accueil.php">Agora Francia</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link active" href="accueil.php">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link" href="parcourir.php">Tout Parcourir</a></li>
+        <li class="nav-item"><a class="nav-link" href="notifications.php">Notifications</a></li>
+        <li class="nav-item"><a class="nav-link" href="panier.php">Panier</a></li>
+
+      <?php if (isset($_SESSION['user'])): ?>
+        <?php if ($_SESSION['user']['type'] === 'vendeur'): ?>
+          <li class="nav-item"><a class="nav-link" href="offres_reçues.php">Offres reçues</a></li>
+       <?php elseif ($_SESSION['user']['type'] === 'acheteur'): ?>
+          <li class="nav-item"><a class="nav-link" href="offres_envoyees.php">Mes offres</a></li>
+       <?php elseif ($_SESSION['user']['type'] === 'admin'): ?>
+          <li class="nav-item"><a class="nav-link" href="offres_admin.php">Gestion des offres</a></li>
+       <?php endif; ?>
+    <?php endif; ?>
+
+
+        <?php if (isset($_SESSION['user'])): ?>
+  <?php if ($_SESSION['user']['type'] === 'admin'): ?>
+    <li class="nav-item"><a class="nav-link" href="ajouter_article.php">Ajouter un article</a></li>
+    <li class="nav-item"><a class="nav-link" href="offres_admin.php">Toutes les offres</a></li>
+    <li class="nav-item"><a class="nav-link" href="gestion_comptes.php">Gestion des comptes</a></li>
+  <?php elseif ($_SESSION['user']['type'] === 'vendeur'): ?>
+    <li class="nav-item"><a class="nav-link" href="ajouter_article_negociation.php">Proposer un article</a></li>
+    <li class="nav-item"><a class="nav-link" href="mes_articles.php">Mes articles</a></li>
+  <?php endif; ?>
+  <li class="nav-item"><a class="nav-link" href="logout.php">Se déconnecter</a></li>
+<?php else: ?>
+  <li class="nav-item"><a class="nav-link" href="compte.php">Votre Compte</a></li>
+<?php endif; ?>
+<?php if ($_SESSION['user']['type'] === 'admin'): ?>
+  <li class="nav-item"><a class="nav-link" href="appliquer_promo.php">Gérer les promotions</a></li>
+<?php endif; ?>
+
+      <?php if (isset($_SESSION['user'])): ?>
+        <span class="navbar-text text-white">
+          Bonjour <strong><?= htmlspecialchars($_SESSION['user']['prenom']) ?></strong>
+        </span>
+      <?php endif; ?>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENU PRINCIPAL -->
+<div class="container mt-5">
+  <h1 class="text-center">Bienvenue sur Agora Francia</h1>
+  <p class="text-center">Le site de vente entre particuliers moderne.</p>
+
+  <!-- Carrousel -->
+  <div id="carouselSelection" class="carousel slide mt-5" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="assets/images/item1.jpg" class="d-block w-100" alt="Item 1">
+      </div>
+      <div class="carousel-item">
+        <img src="assets/images/item2.jpg" class="d-block w-100" alt="Item 2">
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSelection" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselSelection" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white text-center py-4 mt-5">
+  <p>Contact : contact@agorafrancia.fr | +33 1 63 93 77 89 | 75150 Paris</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
