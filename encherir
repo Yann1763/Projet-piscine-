@@ -1,0 +1,68 @@
+<?php
+session_start();
+require 'db.php';
+
+if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'acheteur') {
+    header("Location: compte.php");
+    exit;
+}
+
+$article_id = $_GET['id'] ?? null;
+if (!$article_id) {
+    die("Article non spécifié.");
+}
+
+$stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ? AND type_vente = 'enchere'");
+$stmt->execute([$article_id]);
+$article = $stmt->fetch();
+if (!$article) {
+    die("Article introuvable ou non éligible aux enchères.");
+}
+
+$vendeur_id = $article['vendeur_id'];
+
+$max = $pdo->prepare("SELECT MAX(montant) FROM encheres WHERE article_id = ?");
+$max->execute([$article_id]);
+$montant_actuel = $max->fetchColumn() ?: $article['prix'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $montant = $_POST['montant'];
+    if ($montant <= $montant_actuel) {
+        $error = "Votre enchère doit être supérieure à l'enchère actuelle.";
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO encheres (acheteur_id, article_id, montant) VALUES (?, ?, ?)");
+        $stmt->execute([$_SESSION['user']['id'], $article_id, $montant]);
+
+        $notif = $pdo->prepare("INSERT INTO notifications (utilisateur_id, message) VALUES (?, ?)");
+        $notif->execute([$vendeur_id, "Nouvelle enchère sur l'article : " . $article['titre']]);
+
+        $_SESSION['notif'] = "Enchère placée avec succès.";
+        header("Location: parcourir.php");
+        exit;
+    }
+}
+?>
+
+<!-- HTML form -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Enchérir</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+  <h2>Enchérir sur : <?= htmlspecialchars($article['titre']) ?></h2>
+  <p>Enchère actuelle : <strong><?= $montant_actuel ?> €</strong></p>
+
+  <?php if (isset($error)): ?>
+    <div class="alert alert-danger"><?= $error ?></div>
+  <?php endif; ?>
+
+  <form method="post">
+    <label for="montant">Votre enchère (€)</label>
+    <input type="number" step="0.01" name="montant" class="form-control mb-3" required>
+    <button type="submit" class="btn btn-danger">Proposer une enchère</button>
+  </form>
+</body>
+</html>
